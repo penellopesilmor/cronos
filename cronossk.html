@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contagem Regressiva Personalizada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        #visor {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #333;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Contagem Regressiva</h2>
+    
+    <!-- Campos para o usuário escolher o tempo -->
+    <div class="inputs">
+        <label>Min: <input type="number" id="inputMinutos" min="0" max="60" value="5"></label>
+        <label>Seg: <input type="number" id="inputSegundos" min="0" max="59" value="0"></label>
+    </div>
+
+    <!-- Visor do Tempo -->
+    <div id="visor">05:00</div>
+
+    <!-- Botões de Controle -->
+    <button id="btnIniciar" onclick="iniciarContagem()">Iniciar</button>
+    <button id="btnPausar" onclick="pausarContagem()" disabled>Pausar</button>
+    <button id="btnReiniciar" onclick="reiniciarContagem()">Reiniciar</button>
+</div>
+
+<script>
+    let tempoRestante; // Tempo total em segundos
+    let intervalo; // Guarda a referência do setInterval
+    let emExecucao = false;
+
+    const visor = document.getElementById("visor");
+    const inputMinutos = document.getElementById("inputMinutos");
+    const inputSegundos = document.getElementById("inputSegundos");
+    const btnIniciar = document.getElementById("btnIniciar");
+    const btnPausar = document.getElementById("btnPausar");
+
+    function atualizarVisor(totalSegundos) {
+        let minutos = Math.floor(totalSegundos / 60);
+        let segundos = totalSegundos % 60;
+        visor.innerText = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+    }
+
+    function iniciarContagem() {
+        if (!emExecucao) {
+            // Se o timer estava zerado ou pausado, pega o valor dos inputs
+            if (tempoRestante === undefined || tempoRestante <= 0) {
+                let m = parseInt(inputMinutos.value) || 0;
+                let s = parseInt(inputSegundos.value) || 0;
+                tempoRestante = (m * 60) + s;
+            }
+
+            if (tempoRestante <= 0) return alert("Por favor, insira um tempo maior que zero!");
+
+            emExecucao = true;
+            btnIniciar.disabled = true;
+            btnPausar.disabled = false;
+
+            intervalo = setInterval(() => {
+                tempoRestante--;
+                atualizarVisor(tempoRestante);
+
+                if (tempoRestante <= 0) {
+                    clearInterval(intervalo);
+                    emExecucao = false;
+                    btnIniciar.disabled = false;
+                    btnPausar.disabled = true;
+                    alert("O tempo acabou!");
+                }
+            }, 1000);
+        }
+    }
+
+    function pausarContagem() {
+        clearInterval(intervalo);
+        emExecucao = false;
+        btnIniciar.disabled = false;
+        btnPausar.disabled = true;
+    }
+
+    function reiniciarContagem() {
+        clearInterval(intervalo);
+        emExecucao = false;
+        tempoRestante = undefined;
+        
+        let m = parseInt(inputMinutos.value) || 0;
+        let s = parseInt(inputSegundos.value) || 0;
+        atualizarVisor((m * 60) + s);
+
+        btnIniciar.disabled = false;
+        btnPausar.disabled = true;
+    }
+</script>
+
+</body>
+</html>
